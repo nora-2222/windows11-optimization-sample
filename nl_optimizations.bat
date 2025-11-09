@@ -70,7 +70,6 @@ reg add "HKLM\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters" /v
 reg add "HKLM\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" /v TdrLevel /t REG_DWORD /d 0 /f >nul 2>&1
 
 :: ===== 9. explorer =====
-:: ===== 9. explorer =====
 powershell -NoProfile -ExecutionPolicy Bypass -Command "$bags='HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags'; $bagMRU='HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\BagMRU'; Remove-Item -Path $bags -Recurse -Force -ErrorAction SilentlyContinue; Remove-Item -Path $bagMRU -Recurse -Force -ErrorAction SilentlyContinue; $all='HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell'; if(!(Test-Path $all)){New-Item -Path $all -Force | Out-Null}; Set-ItemProperty -Path $all -Name 'FolderType' -Value 'NotSpecified' -Force" >nul 2>&1
 reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoComplete" /v AutoSuggest /t REG_SZ /d no /f >nul 2>&1
 reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowRecent /t REG_DWORD /d 0 /f >nul 2>&1
@@ -173,4 +172,5 @@ reg add "HKLM\SYSTEM\CurrentControlSet\Services\NDIS\Parameters" /v ThreadPriori
 reg add "HKLM\SYSTEM\CurrentControlSet\Services\nvlddmkm\Parameters" /v ThreadPriority /t REG_DWORD /d 31 /f >nul 2>&1
 
 exit /b 0
+
 
