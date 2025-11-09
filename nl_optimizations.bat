@@ -1,0 +1,186 @@
+@echo off
+:: ========================================
+:: Windows 11 Full Optimization Script
+:: 78 Tweaks - Zero UI, Silent Execution
+:: GitHub Download & Run
+:: ========================================
+
+:: 관리자 권한 요청
+net session >nul 2>&1
+if %errorLevel% neq 0 (
+    powershell "Start-Process '%~f0' -Verb RunAs"
+    exit /b
+)
+
+:: 콘솔 출력 최소화
+echo off
+chcp 437 >nul
+
+:: ===== 1. 데스크톱 응답성 개선 =====
+reg add "HKCU\Control Panel\Desktop" /v MenuShowDelay /t REG_SZ /d 0 /f >nul 2>&1
+reg add "HKCU\Control Panel\Desktop" /v WaitToKillAppTimeout /t REG_SZ /d 5000 /f >nul 2>&1
+reg add "HKCU\Control Panel\Desktop" /v HungAppTimeout /t REG_SZ /d 4000 /f >nul 2>&1
+reg add "HKCU\Control Panel\Desktop" /v DragFullWindows /t REG_SZ /d 0 /f >nul 2>&1
+reg add "HKCU\Control Panel\Keyboard" /v KeyboardDelay /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v TaskbarMn /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v TaskbarDa /t REG_DWORD /d 0 /f >nul 2>&1
+
+:: ===== 2. 검색 & 추천 차단 =====
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v BingSearchEnabled /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent" /v DisableWindowsConsumerFeatures /t REG_DWORD /d 1 /f >nul 2>&1
+
+:: ===== 3. Game DVR / FSO / Game Bar =====
+reg add "HKCU\System\GameConfigStore" /v GameDVR_DXGIHonorFSEWindowsCompatible /t REG_DWORD /d 1 /f >nul 2>&1
+reg add "HKCU\System\GameConfigStore" /v GameDVR_FSEBehavior /t REG_DWORD /d 2 /f >nul 2>&1
+reg add "HKCU\System\GameConfigStore" /v GameDVR_Enabled /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKCU\System\GameConfigStore" /v GameDVR_HonorUserFSEBehaviorMode /t REG_DWORD /d 1 /f >nul 2>&1
+reg add "HKCU\System\GameConfigStore" /v GameDVR_EFSEFeatureFlags /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\GameDVR" /v AllowGameDVR /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKCU\Software\Microsoft\GameBar" /v ShowStartupPanel /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKCU\Software\Microsoft\GameBar" /v GamePanelStartupTipIndex /t REG_DWORD /d 3 /f >nul 2>&1
+reg add "HKCU\Software\Microsoft\GameBar" /v AllowAutoGameMode /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKCU\Software\Microsoft\GameBar" /v AutoGameModeEnabled /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKCU\Software\Microsoft\GameBar" /v UseNexusForGameBarEnabled /t REG_DWORD /d 0 /f >nul 2>&1
+
+:: ===== 4. 서비스 설정 =====
+sc config HomeGroupListener start= demand >nul 2>&1
+sc config HomeGroupProvider start= Manual >nul 2>&1
+
+:: ===== 5. 절전 관리 =====
+reg add "HKLM\System\CurrentControlSet\Control\Session Manager\Power" /v HibernateEnabled /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings" /v ShowHibernateOption /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Power" /v HibernateEnabledDefault /t REG_DWORD /d 0 /f >nul 2>&1
+powercfg.exe /hibernate off >nul 2>&1
+
+:: ===== 6. 위치 & Maps =====
+reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location" /v Value /t REG_SZ /d Deny /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Sensor\Overrides\{BFA794E4-F964-4FDB-90F6-51056BFE4B44}" /v SensorPermissionState /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SYSTEM\CurrentControlSet\Services\lfsvc\Service\Configuration" /v Status /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SYSTEM\Maps" /v AutoUpdateEnabled /t REG_DWORD /d 0 /f >nul 2>&1
+
+:: ===== 7. 보안 가상화 =====
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard" /v EnableVirtualizationBasedSecurity /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v HVCIMATRequired /t REG_DWORD /d 0 /f >nul 2>&1
+bcdedit /set hypervisorsettings Off >nul 2>&1
+bcdedit /set hypervisorlaunchtype Off >nul 2>&1
+
+:: ===== 8. SMB1 & 네트워크 =====
+powershell -Command "Disable-WindowsOptionalFeature -Online -FeatureName SMB1Protocol -NoRestart" >nul 2>&1
+reg add "HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" /v SMB1 /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters" /v DirectoryCacheLifetime /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters" /v FileNotFoundCacheLifetime /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters" /v DormantFileLimit /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" /v TdrLevel /t REG_DWORD /d 0 /f >nul 2>&1
+
+:: ===== 9. 탐색기 =====
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+  "$bags='HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags'; ^
+   $bagMRU='HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\BagMRU'; ^
+   Remove-Item -Path $bags -Recurse -Force -ErrorAction SilentlyContinue; ^
+   Remove-Item -Path $bagMRU -Recurse -Force -ErrorAction SilentlyContinue; ^
+   $all='HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell'; ^
+   if(!(Test-Path $all)){New-Item -Path $all -Force | Out-Null}; ^
+   Set-ItemProperty -Path $all -Name 'FolderType' -Value 'NotSpecified' -Force" >nul 2>&1
+reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoComplete" /v AutoSuggest /t REG_SZ /d no /f >nul 2>&1
+reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowRecent /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f >nul 2>&1
+
+:: ===== 10. WPBT & 스케줄러 =====
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager" /v DisableWpbtExecution /t REG_DWORD /d 1 /f >nul 2>&1
+for %%t in (
+    "Microsoft\Windows\Maintenance\WinSAT"
+    "Microsoft\Windows\Defrag\ScheduledDefrag"
+    "Microsoft\Windows\UpdateOrchestrator\Reboot"
+    "Microsoft\Windows\UpdateOrchestrator\USO_UxBroker_ReadyToReboot"
+    "Microsoft\Windows\UpdateOrchestrator\USO_UxBroker_Update"
+    "Microsoft\Windows\Autochk\Proxy"
+    "Microsoft\Windows\DiskFootprint\Diagnostics"
+    "Microsoft\Windows\Superfetch\SysMain"
+    "Microsoft\Windows\TabletPC\TabletPCEventFilter"
+    "Microsoft\Windows\Diagnosis\OnlineCrashDump"
+    "Microsoft\Windows\Windows Compatibility\AblibLogger"
+    "Microsoft\Windows\Windows Error Reporting\ErrorReporting"
+    "Microsoft\Windows\Diagnostics\Scheduled"
+    "Microsoft\Windows\Search\GatherUserDiaries"
+) do (
+    schtasks /End /TN "%%t" >nul 2>&1
+    schtasks /Change /TN "%%t" /Disable >nul 2>&1
+)
+
+:: ===== 11. 그래픽 & MMCSS =====
+reg add "HKLM\SYSTEM\CurrentControlSet\Services\DXGKrnl" /v MonitorLatencyTolerance /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SYSTEM\CurrentControlSet\Services\DXGKrnl" /v MonitorRefreshLatencyTolerance /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /v NetworkThrottlingIndex /t REG_DWORD /d 4294967295 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /v GPU Priority /t REG_DWORD /d 8 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /v GPU Priority /t REG_DWORD /d 8 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /v Priority /t REG_DWORD /d 6 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /v NoLazyMode /t REG_DWORD /d 1 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /v AlwaysOn /t REG_DWORD /d 1 /f >nul 2>&1
+
+:: ===== 12. 입력 장치 =====
+reg add "HKU\.DEFAULT\Control Panel\Mouse" /v MouseSpeed /t REG_SZ /d 0 /f >nul 2>&1
+reg add "HKU\.DEFAULT\Control Panel\Mouse" /v MouseThreshold1 /t REG_SZ /d 0 /f >nul 2>&1
+reg add "HKU\.DEFAULT\Control Panel\Mouse" /v MouseThreshold2 /t REG_SZ /d 0 /f >nul 2>&1
+reg add "HKU\.DEFAULT\Control Panel\Mouse" /v DoubleClickHeight /t REG_SZ /d 4 /f >nul 2>&1
+reg add "HKU\.DEFAULT\Control Panel\Mouse" /v DoubleClickSpeed /t REG_SZ /d 500 /f >nul 2>&1
+reg add "HKU\.DEFAULT\Control Panel\Mouse" /v DoubleClickWidth /t REG_SZ /d 4 /f >nul 2>&1
+reg add "HKU\.DEFAULT\Control Panel\Mouse" /v MouseSensitivity /t REG_SZ /d 10 /f >nul 2>&1
+reg add "HKU\.DEFAULT\Control Panel\Mouse" /v SmoothMouseXCurve /t REG_BINARY /d 0000000000000000156E00000000000000400100000000000029DC0300000000000000280000000000 /f >nul 2>&1
+reg add "HKU\.DEFAULT\Control Panel\Mouse" /v SmoothMouseYCurve /t REG_BINARY /d 0000000000000000FD11010000000000002404000000000000FC12000000000000C0BB010000000000 /f >nul 2>&1
+reg add "HKU\.DEFAULT\Control Panel\Mouse" /v ActiveWindowTracking /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKU\.DEFAULT\Control Panel\Mouse" /v DockTargetMouseDragOutWidth /t REG_SZ /d 20 /f >nul 2>&1
+reg add "HKU\.DEFAULT\Control Panel\Mouse" /v DockTargetMouseSideMoveWidth /t REG_SZ /d 50 /f >nul 2>&1
+reg add "HKU\.DEFAULT\Control Panel\Mouse" /v DockTargetMouseWidth /t REG_SZ /d 1 /f >nul 2>&1
+reg add "HKU\.DEFAULT\Control Panel\Mouse" /v DockTargetPenDragOutWidth /t REG_SZ /d 30 /f >nul 2>&1
+reg add "HKU\.DEFAULT\Control Panel\Mouse" /v DockTargetPenSideMoveWidth /t REG_SZ /d 50 /f >nul 2>&1
+reg add "HKU\.DEFAULT\Control Panel\Mouse" /v DockTargetPenWidth /t REG_SZ /d 30 /f >nul 2>&1
+reg add "HKU\.DEFAULT\Control Panel\Mouse" /v SnapToDefaultButton /t REG_SZ /d 0 /f >nul 2>&1
+reg add "HKU\.DEFAULT\Control Panel\Mouse" /v SwapMouseButtons /t REG_SZ /d 0 /f >nul 2>&1
+reg add "HKLM\SYSTEM\CurrentControlSet\Services\kbdclass\Parameters" /v KeyboardDataQueueSize /t REG_DWORD /d 32 /f >nul 2>&1
+reg add "HKLM\SYSTEM\CurrentControlSet\Services\mouclass\Parameters" /v MouseDataQueueSize /t REG_DWORD /d 32 /f >nul 2>&1
+
+:: ===== 13. SMB 서버 & 저지연 =====
+reg add "HKLM\SYSTEM\CurrentControlSet\services\LanmanServer\Parameters" /v autodisconnect /t REG_DWORD /d 0xFFFFFFFF /f >nul 2>&1
+reg add "HKLM\SYSTEM\CurrentControlSet\services\LanmanServer\Parameters" /v Size /t REG_DWORD /d 3 /f >nul 2>&1
+reg add "HKLM\SYSTEM\CurrentControlSet\services\LanmanServer\Parameters" /v EnableOplocks /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SYSTEM\CurrentControlSet\services\LanmanServer\Parameters" /v IRPStackSize /t REG_DWORD /d 32 /f >nul 2>&1
+reg add "HKLM\SYSTEM\CurrentControlSet\services\LanmanServer\Parameters" /v SharingViolationDelay /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SYSTEM\CurrentControlSet\services\LanmanServer\Parameters" /v SharingViolationRetries /t REG_DWORD /d 0 /f >nul 2>&1
+
+for %%t in (Low Latency DisplayPostProcessing Audio "Pro Audio" Games "Window Manager") do (
+    reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\%%~t" /v "Latency Sensitive" /t REG_SZ /d True /f >nul 2>&1
+)
+
+:: ===== 14. 전원 & CPU =====
+powercfg -attributes SUB_PROCESSOR -ATTRIB_HID >nul 2>&1
+powercfg /setacvalueindex SCHEME_CURRENT SUB_PROCESSOR CPMINCORES 100 >nul 2>&1
+powercfg /setdcvalueindex SCHEME_CURRENT SUB_PROCESSOR CPMINCORES 100 >nul 2>&1
+powercfg /setacvalueindex SCHEME_CURRENT SUB_PROCESSOR PROCTHROTTLEMAX 100 >nul 2>&1
+powercfg /setdcvalueindex SCHEME_CURRENT SUB_PROCESSOR PROCTHROTTLEMAX 100 >nul 2>&1
+
+:: ===== 15. NVIDIA & 기타 =====
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" /v RmGpsPsEnablePerCpuCoreDpc /t REG_DWORD /d 1 /f >nul 2>&1
+reg add "HKLM\SYSTEM\CurrentControlSet\Services\nvlddmkm" /v RmGpsPsEnablePerCpuCoreDpc /t REG_DWORD /d 1 /f >nul 2>&1
+
+:: ===== 16. 네트워크 고급 =====
+netsh int tcp set supplemental internet congestionprovider=ctcp >nul 2>&1
+powershell "Set-NetTCPSetting -SettingName internet -AutoTuningLevelLocal normal; Set-NetOffloadGlobalSetting -ReceiveSideScaling enabled; Set-NetTCPSetting -SettingName internet -EcnCapability disabled; Set-NetOffloadGlobalSetting -Chimney disabled; Set-NetTCPSetting -SettingName internet -Timestamps disabled; Set-NetTCPSetting -SettingName internet -MaxSynRetransmissions 2; Set-NetTCPSetting -SettingName internet -NonSackRttResiliency disabled; Set-NetTCPSetting -SettingName internet -InitialRto 2000; Set-NetTCPSetting -SettingName internet -MinRto 300" >nul 2>&1
+
+:: ===== 17. 기타 시스템 =====
+reg add "HKLM\SYSTEM\CurrentControlSet\Control" /v WaitToKillServiceTimeout /t REG_SZ /d 2000 /f >nul 2>&1
+reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\Windows Error Reporting" /v Disabled /t REG_DWORD /d 1 /f >nul 2>&1
+reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v AllowTelemetry /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\Maintenance" /v MaintenanceDisabled /t REG_DWORD /d 1 /f >nul 2>&1
+reg add "HKCU\Software\Policies\Microsoft\Windows\Control Panel\Desktop" /v ScreenSaveActive /t REG_SZ /d 0 /f >nul 2>&1
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\PriorityControl" /v Win32PrioritySeparation /t REG_DWORD /d 26 /f >nul 2>&1
+powershell "Set-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings' -Name TaskbarEndTask -Value 1 -Type DWord -Force" >nul 2>&1
+
+:: 드라이버 우선순위
+reg add "HKLM\SYSTEM\CurrentControlSet\Services\usbxhci\Parameters" /v ThreadPriority /t REG_DWORD /d 31 /f >nul 2>&1
+reg add "HKLM\SYSTEM\CurrentControlSet\Services\USBHUB3\Parameters" /v ThreadPriority /t REG_DWORD /d 31 /f >nul 2>&1
+reg add "HKLM\SYSTEM\CurrentControlSet\Services\NDIS\Parameters" /v ThreadPriority /t REG_DWORD /d 31 /f >nul 2>&1
+reg add "HKLM\SYSTEM\CurrentControlSet\Services\nvlddmkm\Parameters" /v ThreadPriority /t REG_DWORD /d 31 /f >nul 2>&1
+
+:: 완료
+exit /b 0

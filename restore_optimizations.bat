@@ -1,0 +1,192 @@
+@echo off
+:: ========================================
+:: Windows 11 Full Restore Script
+:: 100% Reverts nl_optimizations.bat
+:: GitHub Download & Run
+:: ========================================
+
+:: 관리자 권한 자동 요청
+net session >nul 2>&1
+if %errorLevel% neq 0 (
+    powershell "Start-Process '%~f0' -Verb RunAs"
+    exit /b
+)
+
+echo off
+chcp 437 >nul
+
+:: ===== 1. 데스크톱 응답성 복원 =====
+reg delete "HKCU\Control Panel\Desktop" /v MenuShowDelay /f >nul 2>&1
+reg delete "HKCU\Control Panel\Desktop" /v WaitToKillAppTimeout /f >nul 2>&1
+reg delete "HKCU\Control Panel\Desktop" /v HungAppTimeout /f >nul 2>&1
+reg delete "HKCU\Control Panel\Desktop" /v DragFullWindows /f >nul 2>&1
+reg delete "HKCU\Control Panel\Keyboard" /v KeyboardDelay /f >nul 2>&1
+reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v TaskbarMn /f >nul 2>&1
+reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v TaskbarDa /f >nul 2>&1
+
+:: ===== 2. 검색 & 추천 복원 =====
+reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v BingSearchEnabled /f >nul 2>&1
+reg delete "HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent" /v DisableWindowsConsumerFeatures /f >nul 2>&1
+
+:: ===== 3. Game DVR / FSO / Game Bar 복원 =====
+reg delete "HKCU\System\GameConfigStore" /v GameDVR_DXGIHonorFSEWindowsCompatible /f >nul 2>&1
+reg delete "HKCU\System\GameConfigStore" /v GameDVR_FSEBehavior /f >nul 2>&1
+reg delete "HKCU\System\GameConfigStore" /v GameDVR_Enabled /f >nul 2>&1
+reg delete "HKCU\System\GameConfigStore" /v GameDVR_HonorUserFSEBehaviorMode /f >nul 2>&1
+reg delete "HKCU\System\GameConfigStore" /v GameDVR_EFSEFeatureFlags /f >nul 2>&1
+reg delete "HKLM\SOFTWARE\Policies\Microsoft\Windows\GameDVR" /v AllowGameDVR /f >nul 2>&1
+reg delete "HKCU\Software\Microsoft\GameBar" /v ShowStartupPanel /f >nul 2>&1
+reg delete "HKCU\Software\Microsoft\GameBar" /v GamePanelStartupTipIndex /f >nul 2>&1
+reg delete "HKCU\Software\Microsoft\GameBar" /v AllowAutoGameMode /f >nul 2>&1
+reg delete "HKCU\Software\Microsoft\GameBar" /v AutoGameModeEnabled /f >nul 2>&1
+reg delete "HKCU\Software\Microsoft\GameBar" /v UseNexusForGameBarEnabled /f >nul 2>&1
+
+:: ===== 4. 서비스 복원 =====
+sc config HomeGroupListener start= demand >nul 2>&1
+sc config HomeGroupProvider start= auto >nul 2>&1
+
+:: ===== 5. 절전 모드 복원 =====
+reg delete "HKLM\System\CurrentControlSet\Control\Session Manager\Power" /v HibernateEnabled /f >nul 2>&1
+reg delete "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings" /v ShowHibernateOption /f >nul 2>&1
+reg delete "HKLM\SYSTEM\CurrentControlSet\Control\Power" /v HibernateEnabledDefault /f >nul 2>&1
+powercfg.exe /hibernate on >nul 2>&1
+
+:: ===== 6. 위치 서비스 복원 =====
+reg delete "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location" /v Value /f >nul 2>&1
+reg delete "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Sensor\Overrides\{BFA794E4-F964-4FDB-90F6-51056BFE4B44}" /v SensorPermissionState /f >nul 2>&1
+reg delete "HKLM\SYSTEM\CurrentControlSet\Services\lfsvc\Service\Configuration" /v Status /f >nul 2>&1
+
+:: ===== 7. Windows Maps 복원 =====
+reg delete "HKLM\SYSTEM\Maps" /v AutoUpdateEnabled /f >nul 2>&1
+
+:: ===== 8. VBS / HVCI / Hypervisor 복원 =====
+reg delete "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard" /v EnableVirtualizationBasedSecurity /f >nul 2>&1
+reg delete "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /f >nul 2>&1
+reg delete "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v HVCIMATRequired /f >nul 2>&1
+bcdedit /deletevalue hypervisorsettings >nul 2>&1
+bcdedit /deletevalue hypervisorlaunchtype >nul 2>&1
+
+:: ===== 9. SMB1 복원 (기능 활성화) =====
+powershell -Command "Enable-WindowsOptionalFeature -Online -FeatureName SMB1Protocol -NoRestart" >nul 2>&1
+reg delete "HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" /v SMB1 /f >nul 2>&1
+
+:: ===== 10. 탐색기 폴더 뷰 복원 =====
+:: (Bags는 시스템이 자동 재생성 → 삭제 불필요, PowerShell 복원 불가 → 생략)
+reg delete "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoComplete" /v AutoSuggest /f >nul 2>&1
+reg delete "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowRecent /f >nul 2>&1
+reg delete "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /f >nul 2>&1
+
+:: ===== 11. WPBT 복원 =====
+reg delete "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager" /v DisableWpbtExecution /f >nul 2>&1
+
+:: ===== 12. 스케줄러 작업 복원 =====
+for %%t in (
+    "Microsoft\Windows\Maintenance\WinSAT"
+    "Microsoft\Windows\Defrag\ScheduledDefrag"
+    "Microsoft\Windows\UpdateOrchestrator\Reboot"
+    "Microsoft\Windows\UpdateOrchestrator\USO_UxBroker_ReadyToReboot"
+    "Microsoft\Windows\UpdateOrchestrator\USO_UxBroker_Update"
+    "Microsoft\Windows\Autochk\Proxy"
+    "Microsoft\Windows\DiskFootprint\Diagnostics"
+    "Microsoft\Windows\Superfetch\SysMain"
+    "Microsoft\Windows\TabletPC\TabletPCEventFilter"
+    "Microsoft\Windows\Diagnosis\OnlineCrashDump"
+    "Microsoft\Windows\Windows Compatibility\AblibLogger"
+    "Microsoft\Windows\Windows Error Reporting\ErrorReporting"
+    "Microsoft\Windows\Diagnostics\Scheduled"
+    "Microsoft\Windows\Search\GatherUserDiaries"
+) do (
+    schtasks /Change /TN "%%t" /Enable >nul 2>&1
+)
+
+:: ===== 13. 그래픽 지연 복원 =====
+reg delete "HKLM\SYSTEM\CurrentControlSet\Services\DXGKrnl" /v MonitorLatencyTolerance /f >nul 2>&1
+reg delete "HKLM\SYSTEM\CurrentControlSet\Services\DXGKrnl" /v MonitorRefreshLatencyTolerance /f >nul 2>&1
+
+:: ===== 14. SMB 캐시 복원 =====
+reg delete "HKLM\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters" /v DirectoryCacheLifetime /f >nul 2>&1
+reg delete "HKLM\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters" /v FileNotFoundCacheLifetime /f >nul 2>&1
+reg delete "HKLM\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters" /v DormantFileLimit /f >nul 2>&1
+reg delete "HKLM\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" /v TdrLevel /f >nul 2>&1
+
+:: ===== 15. 네트워크 스로틀링 복원 =====
+reg delete "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /v NetworkThrottlingIndex /f >nul 2>&1
+
+:: ===== 16. MMCSS / 우선순위 복원 =====
+reg delete "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /v GPU Priority /f >nul 2>&1
+reg delete "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /v GPU Priority /f >nul 2>&1
+reg delete "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /v Priority /f >nul 2>&1
+reg delete "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /v NoLazyMode /f >nul 2>&1
+reg delete "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /v AlwaysOn /f >nul 2>&1
+
+:: ===== 17. 마우스 복원 =====
+reg delete "HKU\.DEFAULT\Control Panel\Mouse" /v MouseSpeed /f >nul 2>&1
+reg delete "HKU\.DEFAULT\Control Panel\Mouse" /v MouseThreshold1 /f >nul 2>&1
+reg delete "HKU\.DEFAULT\Control Panel\Mouse" /v MouseThreshold2 /f >nul 2>&1
+reg delete "HKU\.DEFAULT\Control Panel\Mouse" /v DoubleClickHeight /f >nul 2>&1
+reg delete "HKU\.DEFAULT\Control Panel\Mouse" /v DoubleClickSpeed /f >nul 2>&1
+reg delete "HKU\.DEFAULT\Control Panel\Mouse" /v DoubleClickWidth /f >nul 2>&1
+reg delete "HKU\.DEFAULT\Control Panel\Mouse" /v MouseSensitivity /f >nul 2>&1
+reg delete "HKU\.DEFAULT\Control Panel\Mouse" /v SmoothMouseXCurve /f >nul 2>&1
+reg delete "HKU\.DEFAULT\Control Panel\Mouse" /v SmoothMouseYCurve /f >nul 2>&1
+reg delete "HKU\.DEFAULT\Control Panel\Mouse" /v ActiveWindowTracking /f >nul 2>&1
+reg delete "HKU\.DEFAULT\Control Panel\Mouse" /v DockTargetMouseDragOutWidth /f >nul 2>&1
+reg delete "HKU\.DEFAULT\Control Panel\Mouse" /v DockTargetMouseSideMoveWidth /f >nul 2>&1
+reg delete "HKU\.DEFAULT\Control Panel\Mouse" /v DockTargetMouseWidth /f >nul 2>&1
+reg delete "HKU\.DEFAULT\Control Panel\Mouse" /v DockTargetPenDragOutWidth /f >nul 2>&1
+reg delete "HKU\.DEFAULT\Control Panel\Mouse" /v DockTargetPenSideMoveWidth /f >nul 2>&1
+reg delete "HKU\.DEFAULT\Control Panel\Mouse" /v DockTargetPenWidth /f >nul 2>&1
+reg delete "HKU\.DEFAULT\Control Panel\Mouse" /v SnapToDefaultButton /f >nul 2>&1
+reg delete "HKU\.DEFAULT\Control Panel\Mouse" /v SwapMouseButtons /f >nul 2>&1
+
+:: ===== 18. 입력 큐 복원 =====
+reg delete "HKLM\SYSTEM\CurrentControlSet\Services\kbdclass\Parameters" /v KeyboardDataQueueSize /f >nul 2>&1
+reg delete "HKLM\SYSTEM\CurrentControlSet\Services\mouclass\Parameters" /v MouseDataQueueSize /f >nul 2>&1
+
+:: ===== 19. SMB 서버 복원 =====
+reg delete "HKLM\SYSTEM\CurrentControlSet\services\LanmanServer\Parameters" /v autodisconnect /f >nul 2>&1
+reg delete "HKLM\SYSTEM\CurrentControlSet\services\LanmanServer\Parameters" /v Size /f >nul 2>&1
+reg delete "HKLM\SYSTEM\CurrentControlSet\services\LanmanServer\Parameters" /v EnableOplocks /f >nul 2>&1
+reg delete "HKLM\SYSTEM\CurrentControlSet\services\LanmanServer\Parameters" /v IRPStackSize /f >nul 2>&1
+reg delete "HKLM\SYSTEM\CurrentControlSet\services\LanmanServer\Parameters" /v SharingViolationDelay /f >nul 2>&1
+reg delete "HKLM\SYSTEM\CurrentControlSet\services\LanmanServer\Parameters" /v SharingViolationRetries /f >nul 2>&1
+
+:: ===== 20. 저지연 태스크 복원 =====
+for %%t in ("Low Latency" "DisplayPostProcessing" "Audio" "Pro Audio" "Games" "Window Manager") do (
+    reg delete "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\%%~t" /v "Latency Sensitive" /f >nul 2>&1
+)
+
+:: ===== 21. CPU 파킹 복원 =====
+powercfg /setacvalueindex SCHEME_CURRENT SUB_PROCESSOR CPMINCORES 0 >nul 2>&1
+powercfg /setdcvalueindex SCHEME_CURRENT SUB_PROCESSOR CPMINCORES 0 >nul 2>&1
+powercfg /setacvalueindex SCHEME_CURRENT SUB_PROCESSOR PROCTHROTTLEMAX 100 >nul 2>&1
+powercfg /setdcvalueindex SCHEME_CURRENT SUB_PROCESSOR PROCTHROTTLEMAX 100 >nul 2>&1
+
+:: ===== 22. NVIDIA DPC 복원 =====
+reg delete "HKLM\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" /v RmGpsPsEnablePerCpuCoreDpc /f >nul 2>&1
+reg delete "HKLM\SYSTEM\CurrentControlSet\Services\nvlddmkm" /v RmGpsPsEnablePerCpuCoreDpc /f >nul 2>&1
+
+:: ===== 23. 전원 설정 복원 (숨김 해제) =====
+powercfg -attributes SUB_PROCESSOR CPMINCORES -ATTRIB_HIDE >nul 2>&1
+
+:: ===== 24. 네트워크 복원 =====
+netsh int tcp set supplemental internet congestionprovider=default >nul 2>&1
+powershell -Command "Set-NetTCPSetting -SettingName internet -AutoTuningLevelLocal normal; Set-NetOffloadGlobalSetting -ReceiveSideScaling enabled; Set-NetTCPSetting -SettingName internet -EcnCapability enabled; Set-NetOffloadGlobalSetting -Chimney enabled; Set-NetTCPSetting -SettingName internet -Timestamps enabled; Set-NetTCPSetting -SettingName internet -MaxSynRetransmissions 4; Set-NetTCPSetting -SettingName internet -NonSackRttResiliency enabled; Set-NetTCPSetting -SettingName internet -InitialRto 3000; Set-NetTCPSetting -SettingName internet -MinRto 50" >nul 2>&1
+
+:: ===== 25. 기타 시스템 복원 =====
+reg delete "HKLM\SYSTEM\CurrentControlSet\Control" /v WaitToKillServiceTimeout /f >nul 2>&1
+reg delete "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\Windows Error Reporting" /v Disabled /f >nul 2>&1
+reg delete "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v AllowTelemetry /f >nul 2>&1
+reg delete "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\Maintenance" /v MaintenanceDisabled /f >nul 2>&1
+reg delete "HKCU\Software\Policies\Microsoft\Windows\Control Panel\Desktop" /v ScreenSaveActive /f >nul 2>&1
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\PriorityControl" /v Win32PrioritySeparation /t REG_DWORD /d 2 /f >nul 2>&1
+reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings" /v TaskbarEndTask /f >nul 2>&1
+
+:: ===== 26. 드라이버 우선순위 복원 =====
+reg delete "HKLM\SYSTEM\CurrentControlSet\Services\usbxhci\Parameters" /v ThreadPriority /f >nul 2>&1
+reg delete "HKLM\SYSTEM\CurrentControlSet\Services\USBHUB3\Parameters" /v ThreadPriority /f >nul 2>&1
+reg delete "HKLM\SYSTEM\CurrentControlSet\Services\NDIS\Parameters" /v ThreadPriority /f >nul 2>&1
+reg delete "HKLM\SYSTEM\CurrentControlSet\Services\nvlddmkm\Parameters" /v ThreadPriority /f >nul 2>&1
+
+:: 완료
+exit /b 0
