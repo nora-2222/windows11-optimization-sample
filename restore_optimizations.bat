@@ -69,7 +69,6 @@ reg delete "HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" /v S
 :: ===== 10. Restore Explorer Folder View =====
 reg delete "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoComplete" /v AutoSuggest /f >nul 2>&1
 reg delete "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowRecent /f >nul 2>&1
-reg delete "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /f >nul 2>&1
 
 :: ===== 11. WPBT Restore =====
 reg delete "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager" /v DisableWpbtExecution /f >nul 2>&1
@@ -184,4 +183,5 @@ reg delete "HKLM\SYSTEM\CurrentControlSet\Services\NDIS\Parameters" /v ThreadPri
 reg delete "HKLM\SYSTEM\CurrentControlSet\Services\nvlddmkm\Parameters" /v ThreadPriority /f >nul 2>&1
 
 exit /b 0
+
 
