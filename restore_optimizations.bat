@@ -16,7 +16,6 @@ chcp 437 >nul
 reg delete "HKCU\Control Panel\Desktop" /v MenuShowDelay /f >nul 2>&1
 reg delete "HKCU\Control Panel\Desktop" /v WaitToKillAppTimeout /f >nul 2>&1
 reg delete "HKCU\Control Panel\Desktop" /v HungAppTimeout /f >nul 2>&1
-reg delete "HKCU\Control Panel\Desktop" /v DragFullWindows /f >nul 2>&1
 reg delete "HKCU\Control Panel\Keyboard" /v KeyboardDelay /f >nul 2>&1
 reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v TaskbarMn /f >nul 2>&1
 reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v TaskbarDa /f >nul 2>&1
@@ -185,3 +184,4 @@ reg delete "HKLM\SYSTEM\CurrentControlSet\Services\NDIS\Parameters" /v ThreadPri
 reg delete "HKLM\SYSTEM\CurrentControlSet\Services\nvlddmkm\Parameters" /v ThreadPriority /f >nul 2>&1
 
 exit /b 0
+
