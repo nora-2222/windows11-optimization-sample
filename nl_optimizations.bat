@@ -2,13 +2,11 @@
 :: ========================================
 :: Windows 11 Full Optimization Script
 :: ========================================
-
 net session >nul 2>&1
 if %errorLevel% neq 0 (
     powershell "Start-Process '%~f0' -Verb RunAs"
     exit /b
 )
-
 echo off
 chcp 437 >nul
 
@@ -53,24 +51,12 @@ reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Sensor\Overrides\{BFA
 reg add "HKLM\SYSTEM\CurrentControlSet\Services\lfsvc\Service\Configuration" /v Status /t REG_DWORD /d 0 /f >nul 2>&1
 reg add "HKLM\SYSTEM\Maps" /v AutoUpdateEnabled /t REG_DWORD /d 0 /f >nul 2>&1
 
-:: ===== secure virtualization =====
-reg add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard" /v EnableVirtualizationBasedSecurity /t REG_DWORD /d 0 /f >nul 2>&1
-reg add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 0 /f >nul 2>&1
-reg add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v HVCIMATRequired /t REG_DWORD /d 0 /f >nul 2>&1
-bcdedit /set hypervisorsettings Off >nul 2>&1
-bcdedit /set hypervisorlaunchtype Off >nul 2>&1
-
 :: ===== SMB1 & Network =====
 powershell -Command "Disable-WindowsOptionalFeature -Online -FeatureName SMB1Protocol -NoRestart" >nul 2>&1
 reg add "HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" /v SMB1 /t REG_DWORD /d 0 /f >nul 2>&1
 reg add "HKLM\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters" /v DirectoryCacheLifetime /t REG_DWORD /d 0 /f >nul 2>&1
 reg add "HKLM\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters" /v FileNotFoundCacheLifetime /t REG_DWORD /d 0 /f >nul 2>&1
 reg add "HKLM\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters" /v DormantFileLimit /t REG_DWORD /d 0 /f >nul 2>&1
-
-:: ===== explorer =====
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$bags='HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags'; $bagMRU='HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\BagMRU'; Remove-Item -Path $bags -Recurse -Force -ErrorAction SilentlyContinue; Remove-Item -Path $bagMRU -Recurse -Force -ErrorAction SilentlyContinue; $all='HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell'; if(!(Test-Path $all)){New-Item -Path $all -Force | Out-Null}; Set-ItemProperty -Path $all -Name 'FolderType' -Value 'NotSpecified' -Force" >nul 2>&1
-reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoComplete" /v AutoSuggest /t REG_SZ /d no /f >nul 2>&1
-reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowRecent /t REG_DWORD /d 0 /f >nul 2>&1
 
 :: ===== WPBT & Scheduler =====
 reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager" /v DisableWpbtExecution /t REG_DWORD /d 1 /f >nul 2>&1
@@ -94,13 +80,6 @@ for %%t in (
     schtasks /Change /TN "%%t" /Disable >nul 2>&1
 )
 
-:: ===== Graphics & MMCSS =====
-reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /v NetworkThrottlingIndex /t REG_DWORD /d 4294967295 /f >nul 2>&1
-reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /v GPU Priority /t REG_DWORD /d 8 /f >nul 2>&1
-reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /v GPU Priority /t REG_DWORD /d 8 /f >nul 2>&1
-reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /v Priority /t REG_DWORD /d 6 /f >nul 2>&1
-reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /v AlwaysOn /t REG_DWORD /d 1 /f >nul 2>&1
-
 :: ===== input device =====
 reg add "HKU\.DEFAULT\Control Panel\Mouse" /v MouseSpeed /t REG_SZ /d 0 /f >nul 2>&1
 reg add "HKU\.DEFAULT\Control Panel\Mouse" /v MouseThreshold1 /t REG_SZ /d 0 /f >nul 2>&1
@@ -108,7 +87,6 @@ reg add "HKU\.DEFAULT\Control Panel\Mouse" /v MouseThreshold2 /t REG_SZ /d 0 /f 
 reg add "HKU\.DEFAULT\Control Panel\Mouse" /v DoubleClickHeight /t REG_SZ /d 4 /f >nul 2>&1
 reg add "HKU\.DEFAULT\Control Panel\Mouse" /v DoubleClickSpeed /t REG_SZ /d 500 /f >nul 2>&1
 reg add "HKU\.DEFAULT\Control Panel\Mouse" /v DoubleClickWidth /t REG_SZ /d 4 /f >nul 2>&1
-reg add "HKU\.DEFAULT\Control Panel\Mouse" /v MouseSensitivity /t REG_SZ /d 10 /f >nul 2>&1
 reg add "HKU\.DEFAULT\Control Panel\Mouse" /v SmoothMouseXCurve /t REG_BINARY /d 0000000000000000156E00000000000000400100000000000029DC0300000000000000280000000000 /f >nul 2>&1
 reg add "HKU\.DEFAULT\Control Panel\Mouse" /v SmoothMouseYCurve /t REG_BINARY /d 0000000000000000FD11010000000000002404000000000000FC12000000000000C0BB010000000000 /f >nul 2>&1
 reg add "HKU\.DEFAULT\Control Panel\Mouse" /v ActiveWindowTracking /t REG_DWORD /d 0 /f >nul 2>&1
@@ -142,10 +120,6 @@ powercfg /setdcvalueindex SCHEME_CURRENT SUB_PROCESSOR CPMINCORES 100 >nul 2>&1
 powercfg /setacvalueindex SCHEME_CURRENT SUB_PROCESSOR PROCTHROTTLEMAX 100 >nul 2>&1
 powercfg /setdcvalueindex SCHEME_CURRENT SUB_PROCESSOR PROCTHROTTLEMAX 100 >nul 2>&1
 
-:: ===== NVIDIA & Others =====
-reg add "HKLM\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" /v RmGpsPsEnablePerCpuCoreDpc /t REG_DWORD /d 1 /f >nul 2>&1
-reg add "HKLM\SYSTEM\CurrentControlSet\Services\nvlddmkm" /v RmGpsPsEnablePerCpuCoreDpc /t REG_DWORD /d 1 /f >nul 2>&1
-
 :: ===== network advanced =====
 netsh int tcp set supplemental internet congestionprovider=ctcp >nul 2>&1
 powershell "Set-NetTCPSetting -SettingName internet -AutoTuningLevelLocal normal; Set-NetOffloadGlobalSetting -ReceiveSideScaling enabled; Set-NetTCPSetting -SettingName internet -EcnCapability disabled; Set-NetOffloadGlobalSetting -Chimney disabled; Set-NetTCPSetting -SettingName internet -Timestamps disabled; Set-NetTCPSetting -SettingName internet -MaxSynRetransmissions 2; Set-NetTCPSetting -SettingName internet -NonSackRttResiliency disabled; Set-NetTCPSetting -SettingName internet -InitialRto 2000; Set-NetTCPSetting -SettingName internet -MinRto 300" >nul 2>&1
@@ -166,9 +140,3 @@ reg add "HKLM\SYSTEM\CurrentControlSet\Services\NDIS\Parameters" /v ThreadPriori
 reg add "HKLM\SYSTEM\CurrentControlSet\Services\nvlddmkm\Parameters" /v ThreadPriority /t REG_DWORD /d 31 /f >nul 2>&1
 
 exit /b 0
-
-
-
-
-
-
