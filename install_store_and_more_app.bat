@@ -7,6 +7,8 @@ chcp 65001 >nul
 :: ===== 1. Install App Installer =====
 echo.
 echo [1/7] Installing App Installer...
+wsreset -i
+Get-AppXPackage *WindowsStore* -AllUsers | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register “$($_.InstallLocation)\AppXManifest.xml”}
 winget install --id Microsoft.DesktopAppInstaller --source winget --accept-package-agreements --accept-source-agreements --silent --force
 
 :: ===== 2. Install Windows Terminal =====
