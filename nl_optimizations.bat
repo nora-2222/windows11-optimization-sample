@@ -7,7 +7,7 @@ if %errorLevel% neq 0 (
     powershell "Start-Process '%~f0' -Verb RunAs"
     exit /b
 )
-echo off
+
 chcp 65001 >nul
 
 :: ===== Disable Start Menu Recommended and more =====
@@ -185,6 +185,7 @@ reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot" /v TurnOffWind
 
 
 exit /b 0
+
 
 
 
