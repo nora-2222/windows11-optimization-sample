@@ -1,7 +1,6 @@
 @echo off
 :: =====================================================
-:: Windows 11 IoT Enterprise LTSC - Auto Setup Script
-:: Final Version | 2025.11.11 | @rep_4441
+:: install_store_and_more_app.bat
 :: =====================================================
 net session >nul 2>&1 || (
     powershell "Start-Process '%~f0' -Verb RunAs"
