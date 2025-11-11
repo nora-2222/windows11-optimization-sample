@@ -89,3 +89,5 @@ winget install --id 9MZ95KL8MR0L --source msstore --accept-package-agreements --
 :: =====================================================
 echo.
 echo [COMPLETE] All installation and setup is complete!
+
+exit /b 0
