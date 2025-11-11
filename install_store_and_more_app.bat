@@ -1,4 +1,4 @@
-@echo on
+@echo off
 chcp 65001 >nul
 :: ========================================
 :: install_store_and_more_app.bat
