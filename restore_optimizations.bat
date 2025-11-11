@@ -1,14 +1,14 @@
-@echo off
-:: ========================================
-:: Windows 11 Optimization Restoration Script
-:: ========================================
+@echo on
+chcp 65001 >nul
 net session >nul 2>&1
 if %errorLevel% neq 0 (
     powershell "Start-Process '%~f0' -Verb RunAs"
     exit /b
 )
+:: ========================================
+:: Windows 11 Optimization Restoration Script
+:: ========================================
 
-chcp 65001 >nul
 
 :: ===== Restore desktop responsiveness =====
 reg add "HKCU\Control Panel\Desktop" /v MenuShowDelay /t REG_SZ /d 400 /f >nul 2>&1
@@ -137,6 +137,7 @@ reg delete "HKLM\SYSTEM\CurrentControlSet\Services\NDIS\Parameters" /v ThreadPri
 reg delete "HKLM\SYSTEM\CurrentControlSet\Services\nvlddmkm\Parameters" /v ThreadPriority /f >nul 2>&1
 
 exit /b 0
+
 
 
 
