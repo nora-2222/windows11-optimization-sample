@@ -7,7 +7,7 @@ net session >nul 2>&1 || (
     powershell "Start-Process '%~f0' -Verb RunAs"
     exit /b
 )
-chcp 65001 >nul
+chcp 437 >nul
 
 :: =====================================================
 :: 1. Install Microsoft Store
