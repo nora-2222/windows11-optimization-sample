@@ -63,7 +63,6 @@ echo [7/8] Setting up PowerShell & CMD profiles...
 set "PS7_PROFILE=%SystemDrive%\Users\Default\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
 mkdir "%SystemDrive%\Users\Default\Documents\PowerShell" 2>nul
 (
-echo # PowerShell 7 Profile - Clean Start
 echo Set-ExecutionPolicy Unrestricted -Force
 ) > "%PS7_PROFILE%"
 set "USER_PS=%USERPROFILE%\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
