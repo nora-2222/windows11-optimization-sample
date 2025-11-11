@@ -8,7 +8,26 @@ chcp 65001 >nul
 echo.
 echo [1/8] Installing Microsoft Store...
 :: 1. Install Microsoft Store
-echo [1/8] Installing Microsoft Store... & powershell -NoProfile -Command "$url='https://aka.ms/microsoft-store'; $out=\"$env:TEMP\Store.msixbundle\"; Invoke-WebRequest -Uri $url -OutFile $out -TimeoutSec 60 -ErrorAction Stop; Add-AppxPackage -Path $out -ForceApplicationShutdown; Write-Host 'Success: Microsoft Store installed'"
+echo [1/8] Installing Microsoft Store...
+powershell -NoProfile -Command ^
+"$ErrorActionPreference='Stop'; ^
+try { ^
+    $temp = \"$env:TEMP\"; ^
+    $storeUrl = 'https://aka.ms/microsoft-store'; ^
+    $vclibsUrl = 'https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx'; ^
+    $out = \"$temp\Store.msixbundle\"; ^
+    $vclibs = \"$temp\VCLibs.appx\"; ^
+    Write-Host 'Downloading VCLibs...'; ^
+    Invoke-WebRequest -Uri $vclibsUrl -OutFile $vclibs -TimeoutSec 60; ^
+    Add-AppxPackage -Path $vclibs -ForceApplicationShutdown; ^
+    Write-Host 'Downloading Store...'; ^
+    Invoke-WebRequest -Uri $storeUrl -OutFile $out -TimeoutSec 120; ^
+    Add-AppxPackage -Path $out -ForceApplicationShutdown; ^
+    Write-Host 'Success: Microsoft Store installed' ^
+} catch { ^
+    Write-Host 'Failed:' $_.Exception.Message; ^
+    Write-Host 'Try manual: https://aka.ms/getstore' ^
+}"
 
 :: ===== 2. Install App Installer =====
 echo.
