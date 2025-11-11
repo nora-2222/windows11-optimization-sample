@@ -1,4 +1,4 @@
-@echo on
+@echo off
 chcp 65001 >nul
 net session >nul 2>&1
 if %errorLevel% neq 0 (
@@ -137,6 +137,7 @@ reg delete "HKLM\SYSTEM\CurrentControlSet\Services\NDIS\Parameters" /v ThreadPri
 reg delete "HKLM\SYSTEM\CurrentControlSet\Services\nvlddmkm\Parameters" /v ThreadPriority /f >nul 2>&1
 
 exit /b 0
+
 
 
 
