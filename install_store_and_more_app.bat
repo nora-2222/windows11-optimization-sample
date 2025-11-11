@@ -7,7 +7,8 @@ chcp 65001 >nul
 :: ===== 1. Install Microsoft Store =====
 echo.
 echo [1/8] Installing Microsoft Store...
-powershell -NoProfile -Command "$ErrorActionPreference='Stop'; try { $id='9wzdncrfjbmp'; $uri='https://store.rg-adguard.net/api/GetFiles'; $body=@{type='ProductId';search=$id}; $resp=Invoke-RestMethod -Uri $uri -Method Post -Body $body -TimeoutSec 30; $msix=$resp | Where-Object {$_.EndsWith('.msixbundle')} | Select-Object -First 1; if($msix) { $out='C:\Temp\Store.msixbundle'; New-Item -ItemType Directory -Path 'C:\Temp' -Force | Out-Null; Invoke-WebRequest -Uri $msix -OutFile $out -TimeoutSec 60; Add-AppxPackage -Path $out -ForceApplicationShutdown; Write-Host 'Success: Microsoft Store installed' } else { throw 'MSIX not found' } } catch { Write-Host 'Failed:' $_.Exception.Message; Write-Host 'Manual install: https://aka.ms/getstore' }"
+wsreset -i
+:: powershell -NoProfile -Command "$ErrorActionPreference='Stop'; try { $id='9wzdncrfjbmp'; $uri='https://store.rg-adguard.net/api/GetFiles'; $body=@{type='ProductId';search=$id}; $resp=Invoke-RestMethod -Uri $uri -Method Post -Body $body -TimeoutSec 30; $msix=$resp | Where-Object {$_.EndsWith('.msixbundle')} | Select-Object -First 1; if($msix) { $out='C:\Temp\Store.msixbundle'; New-Item -ItemType Directory -Path 'C:\Temp' -Force | Out-Null; Invoke-WebRequest -Uri $msix -OutFile $out -TimeoutSec 60; Add-AppxPackage -Path $out -ForceApplicationShutdown; Write-Host 'Success: Microsoft Store installed' } else { throw 'MSIX not found' } } catch { Write-Host 'Failed:' $_.Exception.Message; Write-Host 'Manual install: https://aka.ms/getstore' }"
 
 :: ===== 2. Install App Installer =====
 echo.
