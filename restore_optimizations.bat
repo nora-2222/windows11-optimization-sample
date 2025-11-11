@@ -7,7 +7,7 @@ if %errorLevel% neq 0 (
     powershell "Start-Process '%~f0' -Verb RunAs"
     exit /b
 )
-echo off
+
 chcp 65001 >nul
 
 :: ===== Restore desktop responsiveness =====
@@ -137,5 +137,6 @@ reg delete "HKLM\SYSTEM\CurrentControlSet\Services\NDIS\Parameters" /v ThreadPri
 reg delete "HKLM\SYSTEM\CurrentControlSet\Services\nvlddmkm\Parameters" /v ThreadPriority /f >nul 2>&1
 
 exit /b 0
+
 
 
