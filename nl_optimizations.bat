@@ -1,13 +1,13 @@
 @echo on
 chcp 65001 >nul
 net session >nul 2>&1
-:: ========================================
-:: Windows 11 Optimization Script
-:: ========================================
 if %errorLevel% neq 0 (
     powershell "Start-Process '%~f0' -Verb RunAs"
     exit /b
 )
+:: ========================================
+:: Windows 11 Optimization Script
+:: ========================================
 
 :: ===== Disable Start Menu Recommended and more =====
 reg add "HKU\.DEFAULT\Software\Policies\Microsoft\Windows\CloudContent" /v DisableWindowsSpotlightFeatures /t REG_DWORD /d 1 /f >nul 2>&1
@@ -184,6 +184,7 @@ reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot" /v TurnOffWind
 
 
 exit /b 0
+
 
 
 
