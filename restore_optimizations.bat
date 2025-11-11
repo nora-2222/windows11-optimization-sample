@@ -8,7 +8,7 @@ if %errorLevel% neq 0 (
     exit /b
 )
 echo off
-chcp 437 >nul
+chcp 65001 >nul
 
 :: ===== Restore desktop responsiveness =====
 reg add "HKCU\Control Panel\Desktop" /v MenuShowDelay /t REG_SZ /d 400 /f >nul 2>&1
@@ -137,4 +137,5 @@ reg delete "HKLM\SYSTEM\CurrentControlSet\Services\NDIS\Parameters" /v ThreadPri
 reg delete "HKLM\SYSTEM\CurrentControlSet\Services\nvlddmkm\Parameters" /v ThreadPriority /f >nul 2>&1
 
 exit /b 0
+
 
