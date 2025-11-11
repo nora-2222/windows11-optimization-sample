@@ -7,7 +7,8 @@ chcp 65001 >nul
 :: ===== 1. Install Microsoft Store =====
 echo.
 echo [1/8] Installing Microsoft Store...
-powershell -NoProfile -Command "$url='https://storeedgefd.dsx.mp.microsoft.com/v9.0/22509.1401.18.0_neutral_~_8wekyb3d8bbwe/Microsoft.WindowsStore_22509.1401.18.0_neutral_~_8wekyb3d8bbwe.msixbundle'; $out=\"$env:TEMP\Store.msixbundle\"; Invoke-WebRequest -Uri $url -OutFile $out -TimeoutSec 60; Add-AppxPackage -Path $out -ForceApplicationShutdown; Write-Host 'Success: Microsoft Store installed'"
+:: 1. Install Microsoft Store
+echo [1/8] Installing Microsoft Store... & powershell -NoProfile -Command "$url='https://aka.ms/microsoft-store'; $out=\"$env:TEMP\Store.msixbundle\"; Invoke-WebRequest -Uri $url -OutFile $out -TimeoutSec 60 -ErrorAction Stop; Add-AppxPackage -Path $out -ForceApplicationShutdown; Write-Host 'Success: Microsoft Store installed'"
 
 :: ===== 2. Install App Installer =====
 echo.
