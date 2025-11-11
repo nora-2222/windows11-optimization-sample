@@ -7,25 +7,7 @@ chcp 65001 >nul
 :: ===== 1. Install Microsoft Store =====
 echo.
 echo [1/8] Installing Microsoft Store...
-powershell -NoProfile -Command ^
-"$ErrorActionPreference='Stop'; ^
-try { ^
-    $id='9wzdncrfjbmp'; ^
-    $uri='https://store.rg-adguard.net/api/GetFiles'; ^
-    $body=@{type='ProductId';search=$id}; ^
-    $resp=Invoke-RestMethod -Uri $uri -Method Post -Body $body -TimeoutSec 30; ^
-    $msix=$resp | Where-Object {$_.EndsWith('.msixbundle')} | Select-Object -First 1; ^
-    if($msix) { ^
-        $out='C:\Temp\Store.msixbundle'; ^
-        New-Item -ItemType Directory -Path 'C:\Temp' -Force | Out-Null; ^
-        Invoke-WebRequest -Uri $msix -OutFile $out -TimeoutSec 60; ^
-        Add-AppxPackage -Path $out -ForceApplicationShutdown; ^
-        echo 'Success: Microsoft Store installed' ^
-    } else { throw 'MSIX not found' } ^
-} catch { ^
-    echo 'Failed: ' $_.Exception.Message; ^
-    echo 'Manual install: https://aka.ms/getstore' ^
-}"
+powershell -NoProfile -Command "$ErrorActionPreference='Stop'; try { $id='9wzdncrfjbmp'; $uri='https://store.rg-adguard.net/api/GetFiles'; $body=@{type='ProductId';search=$id}; $resp=Invoke-RestMethod -Uri $uri -Method Post -Body $body -TimeoutSec 30; $msix=$resp | Where-Object {$_.EndsWith('.msixbundle')} | Select-Object -First 1; if($msix) { $out='C:\Temp\Store.msixbundle'; New-Item -ItemType Directory -Path 'C:\Temp' -Force | Out-Null; Invoke-WebRequest -Uri $msix -OutFile $out -TimeoutSec 60; Add-AppxPackage -Path $out -ForceApplicationShutdown; Write-Host 'Success: Microsoft Store installed' } else { throw 'MSIX not found' } } catch { Write-Host 'Failed:' $_.Exception.Message; Write-Host 'Manual install: https://aka.ms/getstore' }"
 
 :: ===== 2. Install App Installer =====
 echo.
@@ -54,12 +36,12 @@ winget install --id 9MSMLRH6LZF3 --source msstore --accept-package-agreements --
 
 :: ===== 7. Setup PowerShell & CMD Profiles =====
 echo.
-echo [7/8] Setting up PowerShell ^& CMD profiles...
+echo [7/8] Setting up PowerShell and CMD profiles...
 set "PS7_PROFILE=%SystemDrive%\Users\Default\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
-mkdir "%SystemDrive%\Users\Default\Documents\PowerShell" 2>nul
+if not exist "%SystemDrive%\Users\Default\Documents\PowerShell" mkdir "%SystemDrive%\Users\Default\Documents\PowerShell"
 echo Set-ExecutionPolicy Unrestricted -Force > "%PS7_PROFILE%"
 set "USER_PS=%USERPROFILE%\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
-mkdir "%USERPROFILE%\Documents\PowerShell" 2>nul
+if not exist "%USERPROFILE%\Documents\PowerShell" mkdir "%USERPROFILE%\Documents\PowerShell"
 copy "%PS7_PROFILE%" "%USER_PS%" >nul 2>&1
 reg add "HKLM\SOFTWARE\Microsoft\Command Processor" /v AutoRun /t REG_SZ /d "cls" /f >nul
 
