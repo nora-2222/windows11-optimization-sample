@@ -7,6 +7,7 @@ net session >nul 2>&1 || (
     powershell "Start-Process '%~f0' -Verb RunAs"
     exit /b
 )
+echo off
 chcp 65001 >nul
 
 :: =====================================================
