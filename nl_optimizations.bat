@@ -11,7 +11,7 @@ if %errorLevel% neq 0 (
 
 echo.
 echo ========================================
-echo   Windows 11 Small Optimization Script
+echo  Windows 11 Small Optimization Script
 echo ========================================
 echo.
 
@@ -49,10 +49,11 @@ reg add "HKCU\Software\Microsoft\GameBar" /v UseNexusForGameBarEnabled /t REG_DW
 
 echo.
 echo ========================================
-echo   Complete
+echo  Complete
 echo ========================================
 pause
 exit /b 0
+
 
 
 
