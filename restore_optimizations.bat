@@ -10,6 +10,8 @@ if %errorLevel% neq 0 (
 :: ========================================
 
 echo.
+echo.
+echo.
 echo ========================================
 echo  Windows 11 Optimization Restoration Script
 echo ========================================
@@ -47,7 +49,10 @@ echo.
 echo ========================================
 echo  Complete
 echo ========================================
+echo.
+echo.
 exit /b 0
+
 
 
 
